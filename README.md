@@ -9,8 +9,22 @@ The target database is a local DuckDB file and the default `main` schema contain
 ### Prerequisites
 To run this script, ensure the following are installed and configured:
 * **R / RStudio**
-* **Java Development Kit (JDK):** The OHDSI `DatabaseConnector` relies on Java.
+* **Java Development Kit (JDK):** The OHDSI `DatabaseConnector` relies on Java. Ensure `JAVA_HOME` is set and `R CMD javareconf` has been run for this R installation.
+* **Rtools (Windows only):** Several packages (`Capr`, `DataQualityDashboard`, `rJava`) build from source and require a C/C++ compiler toolchain.
+  * Install the version matching your R release from [cran.r-project.org/bin/windows/Rtools](https://cran.r-project.org/bin/windows/Rtools/).
+  * **If installed to the default path**, no further action is needed.
+  * **If installed to a non-default path** (e.g. `C:\Apps\rtools45` instead of `C:\rtools45`), R won't find it automatically. Add it manually via `usethis::edit_r_environ()`, adding a line such as:
+  * PATH="C:\\rtools45\\usr\\bin;C:\\rtools45\\x86_64-w64-mingw32.static.posix\\bin;${PATH}"
+  * Restart R fully after editing, then verify with `Sys.which("make")` — it should return a path, not `""`.
+  * Verify the full toolchain is detected with `pkgbuild::check_build_tools(debug = TRUE)`.
 * **Target Database:** Ensure the database file is accessible.
+
+### Environment Setup
+Package installation and version locking are handled by `setup.R`, which uses [`renv`](https://rstudio.github.io/renv/) for reproducibility. To set up the environment from a fresh clone:
+```r
+source("setup.R")
+```
+This installs all required CRAN and GitHub-only packages (see script comments for which is which) and produces `renv.lock`. On subsequent runs / other machines, use `renv::restore()` instead of rerunning `setup.R`, to install the exact locked versions rather than the latest ones.
 
 ### Script Breakdown
 
