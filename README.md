@@ -13,9 +13,8 @@ To run this script, ensure the following are installed and configured:
 * **Rtools (Windows only):** Several packages (`Capr`, `DataQualityDashboard`, `rJava`) build from source and require a C/C++ compiler toolchain.
   * Install the version matching your R release from [cran.r-project.org/bin/windows/Rtools](https://cran.r-project.org/bin/windows/Rtools/).
   * **If installed to the default path**, no further action is needed.
-  * **If installed to a non-default path** (e.g. `C:\Apps\rtools45` instead of `C:\rtools45`), R won't find it automatically. Add it manually via `usethis::edit_r_environ()`, adding a line such as:
-  * PATH="C:\\rtools45\\usr\\bin;C:\\rtools45\\x86_64-w64-mingw32.static.posix\\bin;${PATH}"
-  * Restart R fully after editing, then verify with `Sys.which("make")` — it should return a path, not `""`.
+  * **If installed to a non-default path** (e.g. `C:\Apps\rtools45` instead of `C:\rtools45`), add it manually via `usethis::edit_r_environ()`.
+  * Restart R fully after editing, then verify with `Sys.which("make")`.
   * Verify the full toolchain is detected with `pkgbuild::check_build_tools(debug = TRUE)`.
 * **Target Database:** Ensure the database file is accessible.
 
