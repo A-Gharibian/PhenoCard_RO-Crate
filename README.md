@@ -1,7 +1,7 @@
 # PhenoCard_RO-Crate
 
 ### Overview
-This repository contains R scripts to create the RO-crate of a cluster PhenoCard: To evaluate the data quality of a dataset that has been mapped to the OMOP Common Data Model (CDM), to define the Circe-Be rules of exporting the dataset, and to package everything in an RO-crate using a PhenoCard JSON.
+This repository contains R scripts to create the RO-crate of a cluster PhenoCard: To evaluate the data quality of a dataset that has been mapped to the OMOP Common Data Model (CDM), to define the CIRCE rules of exporting the dataset, and to package everything in an RO-crate using a PhenoCard JSON.
 
 ### Database
 The target database is a local DuckDB file and the default `main` schema contains tables of the demo dataset (e.g., `person`, `condition_occurrence`, `visit_occurrence`). The DQD package evaluates data by executing hardcoded SQL queries that specifically target standard OMOP table names.
