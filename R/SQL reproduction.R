@@ -138,10 +138,7 @@ target_labels <- patient_index %>%
   select(subject_id, index_date, target_ecg_afib)
 
 # ----------------------------------------------------------------------------
-# 9. Surrogate row_id mapping — sidesteps int64 precision loss in
-#    getDbCovariateData by giving FeatureExtraction a small, sequential,
-#    double-safe id instead of the raw hashed subject_id. Mapped back
-#    afterward via our own VARCHAR cast (step 12).
+# 9. Surrogate row_id mapping
 # ----------------------------------------------------------------------------
 mapTable <- paste0(cohortTableNames$cohortTable, "_rowmap")
 
@@ -152,8 +149,6 @@ executeSql(connection, sprintf("
 ", cohortDatabaseSchema, mapTable, cohortDatabaseSchema, cohortTableNames$cohortTable))
 
 # Clone of the cohort table with row_id swapped in for subject_id.
-# Column is still literally named "subject_id" so FeatureExtraction's
-# default rowIdField assumption ("subject_id") still applies unchanged.
 feCohortTable <- paste0(cohortTableNames$cohortTable, "_fe")
 
 executeSql(connection, sprintf("
@@ -167,15 +162,7 @@ executeSql(connection, sprintf("
                                cohortDatabaseSchema, mapTable))
 
 # ----------------------------------------------------------------------------
-# 10. Covariate settings — replaces 03_tall_features (conditions + measurements)
-#     - useConditionOccurrenceAnyTimePrior: binary flag, any condition any time
-#       on/before cohort_start_date (mirrors "co.condition_start_date <= idx.index_date")
-#     - useMeasurementValueAnyTimePrior: numeric value, any time on/before
-#       cohort_start_date
-#     - excludedCovariateConceptIds + addDescendantsToExclude: drops AFib and
-#       all its descendants from the candidate covariate set, matching the
-#       "LEFT JOIN concept_ancestor ... WHERE ca.ancestor_concept_id IS NULL"
-#       leakage guard in the SQL version
+# 10. Covariate settings
 # ----------------------------------------------------------------------------
 covariateSettings <- createCovariateSettings(
   useConditionOccurrenceAnyTimePrior = TRUE,
@@ -186,9 +173,6 @@ covariateSettings <- createCovariateSettings(
 
 # ----------------------------------------------------------------------------
 # 11. Extract covariates for both cohorts (cases=1, controls=2)
-#     Clears any orphaned temp tables (id_set_*, cov_*, ref_*) left behind by
-#     a previously interrupted/errored call before retrying — DuckDB doesn't
-#     always roll these back automatically the way Postgres/SQL Server do.
 # ----------------------------------------------------------------------------
 orphans <- querySql(connection, "
   SELECT table_name FROM duckdb_tables()
@@ -213,14 +197,9 @@ covariateData <- getDbCovariateData(
 # ----------------------------------------------------------------------------
 # 12. Pivot long -> wide (FeatureExtraction analog of the DuckDB
 #     "PIVOT tall_features ON feature_name USING MAX(feature_value)" step).
-#     Joins back through row_map to recover the true (precision-safe) subject_id.
-#
 #     Analysis IDs (per FeatureExtraction::createCovariateSettings):
 #       101 = ConditionOccurrenceAnyTimePrior
-#       705 = MeasurementValueAnyTimePrior   (NOT 464 - verified against
-#             package source; 464 falls in the unrelated DrugGroupEra range
-#             and would silently fall through to the default case_when branch,
-#             producing unprefixed measurement feature names)
+#       705 = MeasurementValueAnyTimePrior
 # ----------------------------------------------------------------------------
 row_map <- querySql(connection, sprintf(
   "SELECT row_id, CAST(subject_id AS VARCHAR) AS subject_id FROM %s.%s;",
@@ -253,9 +232,7 @@ feature_matrix <- covariates_df %>%
   )
 
 # ----------------------------------------------------------------------------
-# 13. Demographics (year_of_birth, gender) — direct pull from `person`,
-#     same as the SQL final_ml_matrix step: plain joined columns, not part
-#     of covariateData.
+# 13. Demographics (year_of_birth, gender)
 # ----------------------------------------------------------------------------
 sql_demo <- "SELECT CAST(p.person_id AS VARCHAR) AS subject_id,
                      p.year_of_birth,
@@ -268,7 +245,7 @@ sql_demo <- "SELECT CAST(p.person_id AS VARCHAR) AS subject_id,
 demographics <- querySql(connection, sql_demo)
 
 # ----------------------------------------------------------------------------
-# 14. Assemble final_ml_matrix  ★ MAIN OUTPUT OF PHASE 1 ★
+# 14.  MAIN OUTPUT OF STEP 1
 # ----------------------------------------------------------------------------
 final_ml_matrix <- target_labels %>%
   mutate(subject_id = as.character(subject_id)) %>%
@@ -278,8 +255,7 @@ final_ml_matrix <- target_labels %>%
                 ~ tidyr::replace_na(.x, 0)))
 
 # ----------------------------------------------------------------------------
-# 15. Sanity check — case counts should agree across every stage, mirroring
-#     the final SELECT in the SQL script
+# 15. Sanity check — case counts should agree across every stage.
 # ----------------------------------------------------------------------------
 tibble::tibble(
   cases_in_patient_index = sum(patient_index$cohort_definition_id == 1),
@@ -288,10 +264,7 @@ tibble::tibble(
 )
 
 # ----------------------------------------------------------------------------
-# 16. Persist R output under its own name — never touches final_ml_matrix,
-#     so the unmodified SQL script's output stays intact for comparison.
-#     insertTable is the DatabaseConnector-native way to do this (dbWriteTable's
-#     DBI::Id schema handling isn't guaranteed to work against this connection type).
+# 16. Persist R output under its own name.
 # ----------------------------------------------------------------------------
 insertTable(
   connection        = connection,
@@ -314,9 +287,6 @@ querySql(connection, "
 # ----------------------------------------------------------------------------
 sql_schema <- "main"  # confirm via information_schema.tables if unsure
 
-# int64 option is scoped tightly to this one fetch, then restored — leaving
-# it global would silently change how every later query in the session
-# handles big integers.
 old_opt <- getOption("databaseConnectorInteger64AsNumeric")
 options(databaseConnectorInteger64AsNumeric = FALSE)
 sql_out <- querySql(connection, sprintf("SELECT * FROM %s.final_ml_matrix;", sql_schema))
@@ -345,7 +315,6 @@ comparison <- sql_out %>%
 
 mean(comparison$target_sql == comparison$target_r)  # should be 1.0
 comparison %>% filter(target_sql != target_r)         # inspect any mismatches
-
 
 # Replicating p1_05_cohort_characterization.sql using your final_ml_matrix
 
@@ -397,6 +366,5 @@ target_metrics <- final_ml_matrix %>%
   select(variable_role, variable_name, data_type, category_value, 
          metric_mean_or_count, metric_sd_or_proportion)
 
-# Combine them all together (assuming yob_metrics from the previous step is still there)
 cohort_characterization <- bind_rows(yob_metrics, gender_metrics, target_metrics)
 
