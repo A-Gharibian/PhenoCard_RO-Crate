@@ -2,13 +2,6 @@ library(CirceR)
 library(SqlRender)
 library(DatabaseConnector)
 
-
-# ----------------------------------------------------------------------------
-# Hydrate Capr's bare concept stubs (CONCEPT_ID only) using the vocabulary
-# already loaded in this CDM's own concept table — keeps exported cohort
-# JSON self-contained and version-matched to this database, with no external
-# service dependency and no manual per-concept Atlas export step.
-# ----------------------------------------------------------------------------
 hydrate_concept_json <- function(json_string, connection, vocabularySchema = "main") {
   
   standard_caption <- function(x) {
@@ -36,9 +29,7 @@ hydrate_concept_json <- function(json_string, connection, vocabularySchema = "ma
     for (j in seq_along(items)) {
       cid <- items[[j]]$concept$CONCEPT_ID
       
-      # Aliased to uppercase so column names match what's read below —
-      # querySql() returns columns exactly as written in the query, it
-      # does not auto-uppercase plain SQL the way OHDSI-SQL translation does
+
       details <- querySql(connection, sprintf(
         "SELECT concept_name       AS CONCEPT_NAME,
                 standard_concept   AS STANDARD_CONCEPT,
@@ -74,7 +65,7 @@ hydrate_concept_json <- function(json_string, connection, vocabularySchema = "ma
 
 
 # ----------------------------------------------------------------------------
-# 6. Compile Capr cohorts -> Circe JSON -> OHDSI-SQL
+# 0. Compile Capr cohorts -> Circe JSON -> OHDSI-SQL
 # ----------------------------------------------------------------------------
 cases_json    <- as.json(cases_def)
 controls_json <- as.json(controls_def)
@@ -87,14 +78,12 @@ writeLines(text = cases_json,    con = "AFib_Cases_Cohort.json")
 writeLines(text = controls_json, con = "AFib_Controls_Cohort.json")
 
 
-# ----------------------------------------------------------------------------
-
 cohortDefinitionSet <- tibble::tibble(
   cohortId   = c(1L, 2L),
   cohortName = c("AFib_Cases", "AFib_Controls"),
   json       = c(cases_json, controls_json)
 )
-# ... rest of your script continues unchanged ...# ============================================================================
+# ============================================================================
 # 1. Import the JSON file
 # ============================================================================
 # Read the physical file back into R as a single string
@@ -104,15 +93,12 @@ imported_json_string <- paste(imported_json, collapse = "")
 # ============================================================================
 # 2. Validate with circe-be (CirceR)
 # ============================================================================
-# If this function runs without throwing an error, your JSON is 100% 
-# compliant with the official OHDSI CIRCE standard.
 parsed_expression <- CirceR::cohortExpressionFromJson(imported_json_string)
 
 # ============================================================================
 # 3. Compile to OHDSI-SQL
 # ============================================================================
-# This proves that the rules in your JSON can be successfully 
-# translated into database code.
+e.
 cohort_sql <- CirceR::buildCohortQuery(
   parsed_expression,
   options = CirceR::createGenerateOptions(generateStats = FALSE)
