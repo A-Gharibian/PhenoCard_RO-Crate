@@ -39,4 +39,13 @@ This installs all required CRAN and GitHub-only packages (see script comments fo
 2. Run the script from top to bottom.
 3. Wait for the execution to finish (time will vary depending on dataset size). The interactive dashboard will automatically open in your default web browser once completed.
 
-The script depends on the [OHDSI DataQualityDashboard (DQD)](https://github.com/OHDSI/DataQualityDashboard) package.
+The script depends on the following [OHDSI](https://www.ohdsi.org/) HADES packages:
+
+- [DatabaseConnector](https://github.com/OHDSI/DatabaseConnector)
+- [SqlRender](https://github.com/OHDSI/SqlRender)
+- [Capr](https://github.com/OHDSI/Capr)
+- [CirceR](https://github.com/OHDSI/CirceR)
+- [CohortGenerator](https://github.com/OHDSI/CohortGenerator)
+- [FeatureExtraction](https://github.com/OHDSI/FeatureExtraction)
+- [DataQualityDashboard (DQD)](https://github.com/OHDSI/DataQualityDashboard)
+- 
