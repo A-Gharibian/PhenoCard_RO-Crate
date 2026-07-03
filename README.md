@@ -48,4 +48,3 @@ The script depends on the following [OHDSI](https://www.ohdsi.org/) HADES packag
 - [CohortGenerator](https://github.com/OHDSI/CohortGenerator)
 - [FeatureExtraction](https://github.com/OHDSI/FeatureExtraction)
 - [DataQualityDashboard (DQD)](https://github.com/OHDSI/DataQualityDashboard)
-- 
