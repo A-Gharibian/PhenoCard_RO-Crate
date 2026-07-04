@@ -1,4 +1,4 @@
-# OHDSI Cohort Construction and Feature Extraction Pipeline
+# Cohort Construction and Feature Extraction Pipeline
 
 Builds an OHDSI-standard case/control cohort from a MIMIC-IV OMOP CDM database using Capr, CirceR, CohortGenerator, and FeatureExtraction, targeting a DuckDB backend. The repository demonstrates an end-to-end OHDSI workflow using an atrial fibrillation (AFib) case/control example. The included cohort definitions are intended solely as a technical demonstration of the pipeline and are **not** intended to define or recommend a clinically validated phenotype.
 
