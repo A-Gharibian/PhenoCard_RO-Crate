@@ -29,7 +29,7 @@ To run these scripts, ensure the following are installed and configured:
 * **Rtools (Windows only):** Several packages (`Capr`, `CirceR`, `DataQualityDashboard`, `rJava`) build from source and require a C/C++ compiler toolchain.
   * Install the version matching your R release from [cran.r-project.org/bin/windows/Rtools](https://cran.r-project.org/bin/windows/Rtools/).
   * **If installed to the default path**, no further action is needed.
-  * **If installed to a non-default path** (e.g. `C:\Apps\rtools45` instead of `C:\rtools45`), add it manually via `usethis::edit_r_environ()`.
+  * **If installed to a non-default path** (e.g. `D:\rtools45` instead of `C:\rtools45`), add it manually via `usethis::edit_r_environ()`.
   * Restart R fully after editing, then verify with `Sys.which("make")`.
   * Verify the full toolchain is detected with `pkgbuild::check_build_tools(debug = TRUE)`.
 * **Target Database:** Ensure the database file is accessible.
