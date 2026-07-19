@@ -16,9 +16,10 @@ library(FeatureExtraction)
 # ----------------------------------------------------------------------------
 # 1. Connection
 # ----------------------------------------------------------------------------
+# Point this to your DuckDB CDM file
 connectionDetails <- createConnectionDetails(
   dbms   = "duckdb",
-  server = "D:/MIMIC/MIMIC-omop.db"
+  server = "/path/to/your/cdm.db"
 )
 connection <- connect(connectionDetails)
 
@@ -368,3 +369,8 @@ target_metrics <- final_ml_matrix %>%
 
 cohort_characterization <- bind_rows(yob_metrics, gender_metrics, target_metrics)
 
+# ----------------------------------------------------------------------------
+# 19. Aggregate profile for transport
+#     Requires Aggregate-gen.R to have been sourced in this session.
+# ----------------------------------------------------------------------------
+aggregate_profile <- generate_aggregate_profile(final_ml_matrix, covariates_df, covariate_ref)
