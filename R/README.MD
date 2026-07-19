@@ -56,11 +56,11 @@ The `results` schema is created automatically if it does not already exist.
 
 ## Cohort Definitions
 
-### Cohort 1 — AFib Cases
+### Cohort 1: AFib Cases
 
 **Entry criterion:** first `condition_occurrence` of Atrial Fibrillation (concept `4068155` and descendants).
 
-### Cohort 2 — AFib Controls
+### Cohort 2: AFib Controls
 
 **Entry criterion:** last `visit_occurrence`.
 
@@ -70,7 +70,7 @@ The `results` schema is created automatically if it does not already exist.
 NOT IN (SELECT person_id FROM target_patients)
 ```
 
-Cases and controls are anchored differently by construction — cases at first diagnosis, controls at last visit. This asymmetry is inherited deliberately from the SQL implementation, where it is documented as a known limitation.
+Cases and controls are anchored differently by construction, cases at first diagnosis, controls at last visit. This asymmetry is inherited deliberately from the SQL implementation, where it is documented.
 
 ## Pipeline Steps
 
@@ -211,12 +211,12 @@ The placeholder values must be set to real local paths before the script will ru
 
 The pipeline is intended to produce two PhenoCards:
 
-1. **OMOP demo cohort (100 patients)** — clearly defined and used as the reference. Not matched; it is the target that the second cohort is matched *to*.
-2. **MIMIC-IV matched subset** — drawn from a randomly sampled 10,000-patient pool and reduced to the patients comparable to the reference cohort.
+1. **OMOP demo cohort (100 patients)**: clearly defined and used as the reference. Not matched; it is the target that the second cohort is matched *to*.
+2. **MIMIC-IV matched subset**: drawn from a randomly sampled 10,000-patient pool and reduced to the patients comparable to the reference cohort.
 
 Two additions support this:
 
-- **Aggregate profile via `FeatureExtraction`.** Produce the demographic and clinical profile from HADES aggregated covariate support rather than bespoke summarisation. This is an addition, not a replacement: the manual generator (step 18) is retained deliberately so the pipeline remains usable without the HADES dependency chain.
-- **Propensity score matching via `CohortMethod`.** Selection of the comparable MIMIC subset is currently done with hand-written SQL filters. Moving it to `CohortMethod` replaces bespoke filtering with the standard OHDSI propensity score workflow, which is the point of the exercise — the matching step is the part the raw SQL implementation could not express.
+- **Aggregate profile via `FeatureExtraction`.** Produce the demographic and clinical profile from HADES aggregated covariate support.
+- **Propensity score matching via `CohortMethod`.** Selection of the comparable MIMIC subset is currently done with hand-written SQL filters. Moving it to `CohortMethod` replaces filtering with the standard OHDSI propensity score workflow.
 
-Outcome cohorts apply only to the MIMIC stage, where the patient count supports them. The 100-patient demo serves as the reference cohort and is not itself matched.
+Outcome cohorts apply only to the MIMIC database in stage 2, where the patient count supports them. The 100-patient demo serves as the reference cohort and is not itself matched.
