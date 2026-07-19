@@ -39,9 +39,7 @@ Package installation and version locking are handled by `R/Setup.R`, which uses 
 ```r
 source("R/Setup.R")
 ```
-This installs the required CRAN packages and the OHDSI packages that have no CRAN release (`CirceR`, `Capr`, `DataQualityDashboard`, installed from GitHub). The `renv.lock` it produces is local to your machine and is not distributed with this repository.
-
-Note that `renv::init()` restarts the R session under RStudio. If that happens, re-source the file — it resumes from the package installation step.
+This installs the required CRAN packages and the OHDSI packages that have no CRAN release (`CirceR`, `Capr`, `DataQualityDashboard`, installed from GitHub).
 
 ### Data Quality Assessment — `R/DQA_gen.R`
 
@@ -50,7 +48,7 @@ Note that `renv::init()` restarts the R session under RStudio. If that happens, 
 * **`connectionDetails$server`**: Path to the DuckDB CDM file. Placeholder — set to your local database.
 * **`cdmDatabaseSchema`**: Set to `"main"`, directing the tool to the schema containing the clinical OMOP tables.
 * **`resultsDatabaseSchema`**: Set to `"main"`, acting as the scratchpad for any temporary tables the DQD needs to write during execution.
-* **`cdmSourceName`**: Set to `"MIMIC_IV_Demo_100"`. This string is used to name the final output JSON file.
+* **`cdmSourceName`**: Set to, e.g. `"MIMIC_IV_Demo_100"`. This string is used to name the final output JSON file.
 * **`outputFolder`**: Defines the local directory where the final JSON results will be saved. Placeholder.
 
 #### How to Use
@@ -62,15 +60,15 @@ The resulting JSON is the artifact referenced by the PhenoCard as `dqa_reference
 
 ### Building the Crate — `PhenoCard2Crate.R`
 
-Run from the root of the RO-Crate directory — the folder containing the PhenoCard JSON-LD file and every file it references (DQA results, aggregate profiles, cohort definitions, viewer HTML, README). All paths resolve relative to the current working directory; filenames can be overridden through the `PHENOCARD_FILENAME`, `PHENOCARD_VIEWER_HTML` and `PHENOCARD_README` environment variables.
+Run from the root of the RO-Crate directory — the folder containing the PhenoCard JSON-LD file and every file it references (DQA results, aggregate profiles, cohort definitions, viewer HTML, README). All paths resolve relative to the current working directory; file names can be changed by the `PHENOCARD_FILENAME`, `PHENOCARD_VIEWER_HTML` and `PHENOCARD_README` environment variables.
 
 The script registers referenced files, generates a MINIMAR reporting checklist in markdown for each profile, writes `ro-crate-metadata.json`, and produces a BagIt package. Cohort definitions are discovered by scanning the working directory for filenames ending in `Cohort.json`, so `R/CIRCE-gen.R` must have been run with its working directory set to the crate root for its exports to be picked up.
 
 ### Planned work
 
-The pipeline is intended to produce two PhenoCards: the OMOP demo cohort, which acts as the clearly defined reference, and a MIMIC-IV subset matched to it from a randomly sampled 10,000-patient pool.
+The pipeline is intended to produce two PhenoCards: the OMOP demo cohort, which acts as the reference, and a MIMIC-IV subset matched to it from a randomly sampled 10,000-patient pool.
 
-Supporting this are an aggregate profile built from `FeatureExtraction`'s aggregated covariate support, added alongside the existing manual generator rather than replacing it, and propensity score matching via `CohortMethod` in place of the hand-written SQL filters currently used to select the comparable subset. See [`R/README.md`](R/README.md) for detail.
+Supporting this are an aggregate profile built from `FeatureExtraction`'s aggregated covariate support, added alongside the existing manual demographic generator, see [`R/README.md`](R/README.md) for detail.
 
 ### Dependencies
 
