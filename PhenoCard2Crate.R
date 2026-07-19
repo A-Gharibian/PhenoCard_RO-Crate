@@ -79,8 +79,16 @@ build_minimar_content <- function(pc, profile_id, cohort_files) {
     sex_items <- Filter(function(x) identical(x$variable_name, "Gender") || identical(x$variable_name, "Sex"), inline_agg)
     if (length(sex_items) > 0) {
       sex_info <- paste(sapply(sex_items, function(x) {
+        # metric_sd_or_proportion is overloaded, so honour the unit the record
+        # declares. R/Aggregate-gen.R writes "fraction"; step 18's
+        # cohort_characterization mirrors p1_05_cohort_characterization.sql and
+        # holds percentages instead. Records predating the declaration are
+        # assumed to be fractions, which is the transport format.
+        unit <- safe(x$metric_sd_or_proportion_unit) %||% "fraction"
+        pct  <- suppressWarnings(as.numeric(x$metric_sd_or_proportion))
+        if (identical(unit, "fraction")) pct <- pct * 100
         paste0(x$category_value, ": N=", x$metric_mean_or_count,
-               " (", round(x$metric_sd_or_proportion * 100, 1), "%)")
+               " (", round(pct, 1), "%)")
       }), collapse = " | ")
     }
   }
