@@ -12,7 +12,7 @@ This repository contains R scripts to create the RO-Crate of a cluster PhenoCard
 |------|---------|
 | `R/Setup.R` | One-time environment setup: `renv`, CRAN and GitHub packages, Java, version checks. |
 | `R/SQL reproduction.R` | Main cohort construction and feature extraction pipeline (Capr → CirceR → CohortGenerator → FeatureExtraction). |
-| `R/Aggregate-gen.R` | Builds the aggregate profile carried by the crate: marginal summaries of every patient and feature that entered the ML matrix. |
+| `R/Aggregate-gen.R` | Builds the aggregate profile carried by the crate: marginal summaries of every patient and feature. |
 | `R/CIRCE-gen.R` | Exports hydrated, CIRCE-compliant cohort definition JSON for ATLAS and archival. |
 | `R/DQA_gen.R` | Runs the OHDSI Data Quality Dashboard against the CDM. |
 | `PhenoCard2Crate.R` | Reads a PhenoCard JSON-LD file, generates MINIMAR reporting markdown, and writes the RO-Crate metadata and BagIt package. |
